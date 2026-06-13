@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Nexus AI">
+    <meta name="theme-color" content="#00E5FF">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <title>Nexus AI — Vibe Coding Workspace</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        space: {
+                            900: '#05060A',
+                            800: '#0E1117',
+                            700: '#111827',
+                            card: 'rgba(14, 17, 23, 0.6)'
+                        },
+                        neon: {
+                            cyan: '#00E5FF',
+                            purple: '#8B5CF6',
+                            blue: '#38BDF8',
+                            white: '#F4F7FF'
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'hero-glow': 'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, rgba(0, 229, 255, 0) 50%)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP & Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Initialize Theme -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</head>
+<body class="transition-colors duration-0 overflow-hidden font-sans bg-space-900">
+    
+    <!-- Theme Transition Overlay -->
+    <div id="theme-transition-overlay" class="fixed inset-0 pointer-events-none z-[100] bg-white opacity-0" style="clip-path: circle(0% at 50% 50%);"></div>
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="fixed top-6 right-6 z-40 group flex items-center justify-center w-12 h-12 rounded-full glass-panel overflow-hidden transition-transform active:scale-95 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+        <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <i class="ph-fill ph-moon text-xl absolute transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-100 rotate-0 dark:scale-0 dark:rotate-90 text-blue-500" id="icon-moon"></i>
+        <i class="ph-fill ph-sun text-xl absolute transform transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-0 -rotate-90 dark:scale-100 dark:rotate-0 text-yellow-400" id="icon-sun"></i>
+    </button>
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute inset-0 bg-hero-glow"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 mix-blend-screen"></div>
+        <!-- Animated Particles Container -->
+        <div id="particles" class="absolute inset-0"></div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="flex flex-col-reverse md:flex-row h-screen w-full relative z-10 p-2 md:p-4 gap-2 md:gap-4 box-border overflow-hidden">
+        
+        <!-- Left Sidebar (Responsive: Bottom nav on mobile, slim vertical on desktop) -->
+        <aside class="w-full md:w-20 md:hover:w-64 transition-all duration-500 ease-out flex flex-row md:flex-col items-center justify-between md:justify-start group glass-panel rounded-2xl py-2 px-4 md:py-6 md:px-4 h-16 md:h-full relative overflow-hidden flex-shrink-0 z-50">
+            <!-- Logo (Hidden on mobile) -->
+            <a href="index.html" class="hidden md:flex items-center gap-4 mb-8 w-full px-2 cursor-pointer logo-container group/logo no-underline">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-neon-cyan to-neon-purple flex items-center justify-center shadow-[0_0_15px_rgba(0,229,255,0.5)] flex-shrink-0 group-hover/logo:scale-110 transition-transform">
+                    <i class="ph-bold ph-planet text-white text-xl"></i>
+                </div>
+                <span class="font-display font-bold text-xl tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-white to-neon-cyan">NEXUS</span>
+            </a>
+
+            <!-- Navigation (Horizontal on mobile, vertical on desktop) -->
+            <nav class="flex flex-row md:flex-col gap-1 md:gap-2 w-full md:w-full flex-grow justify-around md:justify-start">
+                <!-- Back to Home -->
+                <a href="index.html" id="btn-back-home" class="nav-item flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5 border border-white/5 bg-white/[0.02]">
+                    <div class="absolute inset-0 bg-gradient-to-r from-neon-purple/10 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                    <i class="ph-fill ph-house text-xl md:text-2xl text-neon-purple group-hover/item:text-white transition-colors z-10 flex-shrink-0 drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10 hidden md:inline">Back to Home</span>
+                </a>
+
+                <a href="#" data-target="dashboard" class="nav-item active flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item">
+                    <div class="active-indicator absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-1 md:w-1 md:h-6 md:left-0 md:top-1/2 md:-translate-y-1/2 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)] transition-transform duration-300"></div>
+                    <i class="ph ph-squares-four text-xl md:text-2xl text-neon-cyan group-hover/item:text-neon-cyan transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-10 hidden md:inline">Dashboard</span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-neon-cyan/20 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity"></div>
+                </a>
+                
+                <a href="#" data-target="editor" class="nav-item flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5">
+                    <div class="active-indicator absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-1 md:w-1 md:h-6 md:left-0 md:top-1/2 md:-translate-y-1/2 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)] scale-x-0 md:scale-x-100 md:scale-y-0 transition-transform duration-300"></div>
+                    <i class="ph ph-code text-xl md:text-2xl text-gray-400 group-hover/item:text-white transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10 hidden md:inline">Code Editor</span>
+                </a>
+
+                <a href="#" data-target="chat" class="nav-item flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5">
+                    <div class="active-indicator absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-1 md:w-1 md:h-6 md:left-0 md:top-1/2 md:-translate-y-1/2 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)] scale-x-0 md:scale-x-100 md:scale-y-0 transition-transform duration-300"></div>
+                    <i class="ph ph-chat-teardrop-text text-xl md:text-2xl text-gray-400 group-hover/item:text-white transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10 hidden md:inline">AI Chat</span>
+                </a>
+
+                <a href="#" data-target="agents" class="nav-item flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5">
+                    <div class="active-indicator absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-1 md:w-1 md:h-6 md:left-0 md:top-1/2 md:-translate-y-1/2 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)] scale-x-0 md:scale-x-100 md:scale-y-0 transition-transform duration-300"></div>
+                    <i class="ph ph-robot text-xl md:text-2xl text-gray-400 group-hover/item:text-white transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10 hidden md:inline">AI Agents</span>
+                </a>
+
+                <a href="#" data-target="projects" class="nav-item flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5">
+                    <div class="active-indicator absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-1 md:w-1 md:h-6 md:left-0 md:top-1/2 md:-translate-y-1/2 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)] scale-x-0 md:scale-x-100 md:scale-y-0 transition-transform duration-300"></div>
+                    <i class="ph ph-folder text-xl md:text-2xl text-gray-400 group-hover/item:text-white transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10 hidden md:inline">Projects</span>
+                </a>
+                
+                <a href="#" data-target="terminal" class="nav-item flex items-center gap-4 p-2 md:p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5">
+                    <div class="active-indicator absolute left-1/2 -translate-x-1/2 bottom-0 w-6 h-1 md:w-1 md:h-6 md:left-0 md:top-1/2 md:-translate-y-1/2 bg-neon-cyan rounded-full shadow-[0_0_10px_rgba(0,229,255,1)] scale-x-0 md:scale-x-100 md:scale-y-0 transition-transform duration-300"></div>
+                    <i class="ph ph-terminal text-xl md:text-2xl text-gray-400 group-hover/item:text-white transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10 hidden md:inline">Terminal</span>
+                </a>
+            </nav>
+
+            <!-- Bottom Actions (Hidden on mobile to save nav space, Settings is handled in main menu if needed) -->
+            <div class="mt-auto hidden md:flex flex-col w-full gap-2 pt-4 border-t border-white/5">
+                <a href="#" data-target="settings" class="nav-item flex items-center gap-4 w-full p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5">
+                    <div class="active-indicator absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-neon-cyan rounded-r-full shadow-[0_0_10px_rgba(0,229,255,1)] scale-y-0 transition-transform duration-300"></div>
+                    <i class="ph ph-gear text-2xl text-gray-400 group-hover/item:text-white transition-colors z-10 flex-shrink-0"></i>
+                    <span class="font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-gray-300 group-hover/item:text-white z-10">Settings</span>
+                </a>
+                <a href="#" class="nav-item flex items-center gap-4 w-full p-3 rounded-xl transition-all relative overflow-hidden group/item hover:bg-white/5 mt-2">
+                    <div class="w-8 h-8 rounded-full overflow-hidden border border-white/20 flex-shrink-0">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="User" class="w-full h-full object-cover"/>
+                    </div>
+                    <div class="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                        <span class="font-medium text-sm">Sumer Yadav</span>
+                        <span class="text-xs text-neon-purple">Pro Plan</span>
+                    </div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 h-full flex flex-col gap-4 overflow-hidden relative rounded-2xl relative">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="app-view flex-1 h-full flex flex-col gap-4 min-h-0 transition-opacity duration-300">
+                <!-- Hero Header -->
+                <header class="glass-panel rounded-2xl p-8 flex flex-col justify-center relative overflow-hidden h-64 shrink-0 dashboard-hero">
+                    <!-- Decorative animated elements -->
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-neon-purple/20 rounded-full blur-[80px] animate-pulse"></div>
+                    <div class="absolute right-40 -bottom-20 w-64 h-64 bg-neon-cyan/20 rounded-full blur-[80px] animate-pulse" style="animation-delay: 1s;"></div>
+                    
+                    <div class="relative z-10 max-w-2xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neon-cyan mb-4 backdrop-blur-md">
+                            <span class="w-2 h-2 rounded-full bg-neon-cyan animate-pulse shadow-[0_0_8px_#00E5FF]"></span>
+                            SYSTEM ONLINE
+                        </div>
+                        <h1 class="text-5xl font-display font-bold mb-2 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-neon-white to-gray-400 hero-title">
+                            Build Beyond Reality
+                        </h1>
+                        <p class="text-gray-400 text-lg hero-subtitle">The future of AI-powered development begins with Nexus.</p>
+                    </div>
+                </header>
+
+                <!-- Workspace Grid (Responsive stacking on tablet/mobile) -->
+                <div class="flex-1 flex flex-col lg:flex-row gap-4 min-h-0 overflow-y-auto lg:overflow-hidden">
+                    <!-- Editor / Terminal Area -->
+                    <div class="flex-1 flex flex-col gap-4 min-w-0 min-h-[400px]">
+                        
+                        <!-- Code Editor Mockup -->
+                        <div class="flex-1 glass-panel rounded-2xl overflow-hidden flex flex-col editor-panel relative group min-h-[250px]">
+                            <div class="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
+                            <!-- Editor Header -->
+                            <div class="h-12 border-b border-white/5 flex items-center px-4 justify-between bg-space-800/50 backdrop-blur-md">
+                                <div class="flex gap-2">
+                                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-md bg-space-700/50 border border-white/5 text-sm cursor-pointer hover:bg-space-700 transition-colors">
+                                        <i class="ph-fill ph-file-ts text-blue-400"></i>
+                                        <span class="font-mono text-gray-300">App.tsx</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm cursor-pointer hover:bg-space-700/50 transition-colors opacity-50">
+                                        <i class="ph-fill ph-file-css text-blue-300"></i>
+                                        <span class="font-mono text-gray-300">styles.css</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button class="hover:text-neon-cyan transition-colors"><i class="ph ph-play"></i></button>
+                                    <button class="hover:text-neon-cyan transition-colors"><i class="ph ph-git-branch"></i></button>
+                                    <button class="hover:text-neon-cyan transition-colors"><i class="ph ph-dots-three-outline-vertical"></i></button>
+                                </div>
+                            </div>
+                            <!-- Editor Body -->
+                            <div class="flex-1 p-4 font-mono text-sm overflow-auto relative leading-loose">
+                                <div class="flex">
+                                    <div class="text-gray-600 select-none text-right pr-4 border-r border-white/5 flex flex-col items-end">
+                                        <span>1</span>
+                                    </div>
+                                    <div class="pl-4 text-gray-300 w-full relative">
+                                        <div class="code-line text-gray-500 italic">// Workspace empty. Tell Atom to start building.</div>
+                                        
+                                        <!-- Blinking Cursor -->
+                                        <div class="absolute w-[2px] h-5 bg-neon-cyan left-[16px] top-[8px] animate-pulse shadow-[0_0_8px_#00E5FF]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terminal Mockup -->
+                        <div class="h-48 glass-panel rounded-2xl overflow-hidden flex flex-col terminal-panel flex-shrink-0">
+                            <div class="h-8 border-b border-white/5 flex items-center px-4 gap-2 bg-space-800/50">
+                                <i class="ph ph-terminal-window text-gray-400"></i>
+                                <span class="text-xs text-gray-400 font-mono">nexus-terminal ~ zsh</span>
+                            </div>
+                            <div class="flex-1 p-4 font-mono text-sm overflow-auto text-gray-300 flex flex-col gap-1">
+                                <div><span class="text-green-400">nexus@sys</span><span class="text-gray-500">~%</span> nexus start --mode=cinematic</div>
+                                <div class="text-neon-cyan">Initializing quantum interface... [OK]</div>
+                                <div class="text-neon-cyan">Loading AI Core... [OK]</div>
+                                <div class="text-neon-cyan">Compiling assets... [OK]</div>
+                                <div><span class="text-neon-purple animate-pulse">⚡ Server running at http://localhost:3000</span></div>
+                                <div class="mt-2"><span class="text-green-400">nexus@sys</span><span class="text-gray-500">~%</span> <span class="w-2 h-4 bg-gray-400 inline-block animate-pulse"></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Sidebar: AI Assistant (Full width on mobile, w-80 on desktop) -->
+                    <aside class="w-full lg:w-80 glass-panel rounded-2xl flex flex-col relative overflow-hidden ai-panel flex-shrink-0 h-[500px] lg:h-auto">
+                        <!-- Glowing Border Effect -->
+                        <div class="absolute inset-0 border border-neon-purple/20 rounded-2xl pointer-events-none mix-blend-screen"></div>
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-purple to-transparent opacity-50"></div>
+
+                        <!-- Header -->
+                        <div class="p-5 border-b border-white/5 flex items-center justify-between relative z-10 bg-space-800/30 backdrop-blur-md">
+                            <div class="flex items-center gap-3 relative">
+                                <div class="relative">
+                                    <div class="w-10 h-10 rounded-full bg-space-900 border border-neon-purple/50 flex items-center justify-center relative z-10 overflow-hidden orb-container transition-colors duration-500">
+                                        <div class="absolute inset-0 bg-neon-purple/20 animate-pulse orb-bg transition-colors duration-500"></div>
+                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-neon-purple to-neon-cyan blur-[2px] animate-spin orb-core" style="animation-duration: 4s;"></div>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <div class="w-3 h-3 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute inset-0 bg-neon-purple blur-md opacity-30 animate-pulse orb-glow transition-colors duration-500"></div>
+                                </div>
+                                <div class="relative z-50">
+                                    <div class="flex items-center gap-2 cursor-pointer group" id="model-selector-btn">
+                                        <h3 class="font-display font-semibold text-white" id="current-model-name">Atom 1.2 Pro</h3>
+                                        <i class="ph ph-caret-down text-gray-400 group-hover:text-white transition-colors text-sm"></i>
+                                    </div>
+                                    <p class="text-xs text-neon-purple font-mono flex items-center gap-1 mt-0.5 transition-colors duration-500" id="model-status">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-neon-purple inline-block orb-status transition-colors duration-500"></span> <span id="model-status-text">Balanced</span>
+                                    </p>
+                                    
+                                    <!-- Dropdown Menu -->
+                                    <div id="model-dropdown" class="absolute top-full left-0 mt-2 w-48 glass-panel border border-white/10 rounded-xl overflow-hidden opacity-0 pointer-events-none transform -translate-y-2 transition-all duration-200">
+                                        <div class="p-1 flex flex-col gap-1">
+                                            <button class="model-option flex flex-col items-start px-3 py-2 rounded-lg hover:bg-white/5 transition-colors w-full text-left" data-model="flash">
+                                                <span class="text-sm font-semibold text-white flex items-center gap-2"><i class="ph-fill ph-lightning text-yellow-400"></i> Atom 1.1 Flash</span>
+                                                <span class="text-xs text-gray-400">Ultra-fast, draft quality</span>
+                                            </button>
+                                            <button class="model-option flex flex-col items-start px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors w-full text-left" data-model="pro">
+                                                <span class="text-sm font-semibold text-white flex items-center gap-2"><i class="ph-fill ph-brain text-neon-purple"></i> Atom 1.2 Pro</span>
+                                                <span class="text-xs text-gray-400">Balanced, high fidelity</span>
+                                            </button>
+                                            <button class="model-option flex flex-col items-start px-3 py-2 rounded-lg hover:bg-white/5 transition-colors w-full text-left" data-model="ultra">
+                                                <span class="text-sm font-semibold text-white flex items-center gap-2"><i class="ph-fill ph-infinity text-neon-cyan"></i> Atom 1.3 Ultra</span>
+                                                <span class="text-xs text-gray-400">Maximum capability, slow</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-white transition-colors">
+                                <i class="ph ph-dots-three-outline-vertical text-xl"></i>
+                            </button>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 relative z-10 custom-scrollbar">
+                            <!-- AI Message -->
+                            <div class="flex gap-3 ai-message">
+                                <div class="w-8 h-8 rounded-full bg-neon-purple/20 border border-neon-purple/30 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <i class="ph-fill ph-magic-wand text-neon-purple text-sm"></i>
+                                </div>
+                                <div class="glass-panel-light p-3 rounded-2xl rounded-tl-sm text-sm text-gray-200 border border-white/5 leading-relaxed">
+                                    Hello! I'm Atom, your AI coding assistant. I'm ready to help you build your project. What would you like to create today?
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="p-4 border-t border-white/5 relative z-10 bg-space-800/30 backdrop-blur-md">
+                            <div class="relative group/input">
+                                <div class="absolute inset-0 bg-gradient-to-r from-neon-purple to-neon-cyan rounded-xl blur-md opacity-20 group-hover/input:opacity-40 transition-opacity"></div>
+                                <div class="relative bg-space-900 border border-white/10 rounded-xl p-1 flex items-center focus-within:border-neon-purple/50 transition-colors">
+                                    <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                        <i class="ph ph-plus"></i>
+                                    </button>
+                                    <input type="text" placeholder="Ask Atom to build anything..." class="bg-transparent border-none outline-none flex-1 text-sm text-white placeholder-gray-500 px-2 h-9">
+                                    <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-neon-cyan transition-colors bg-white/5 rounded-lg">
+                                        <i class="ph-fill ph-paper-plane-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <!-- VIEW: CODE EDITOR -->
+            <section id="view-editor" class="app-view flex-1 h-full hidden flex-col absolute inset-0 z-20">
+                <div class="glass-panel w-full h-full rounded-2xl overflow-hidden flex flex-col border border-white/5 shadow-2xl">
+                    <div class="h-12 border-b border-white/5 flex items-center px-4 justify-between bg-space-800/80 backdrop-blur-md">
+                        <div class="flex gap-2">
+                            <span class="text-gray-400 font-mono text-sm"><i class="ph-fill ph-folder text-neon-cyan mr-2"></i> src / components / <span class="text-white">App.tsx</span></span>
+                        </div>
+                        <div class="flex gap-3 text-gray-400">
+                            <i class="ph ph-play hover:text-neon-cyan cursor-pointer transition-colors text-lg"></i>
+                            <i class="ph ph-floppy-disk hover:text-neon-cyan cursor-pointer transition-colors text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex bg-space-900/50">
+                        <div class="w-12 border-r border-white/5 flex flex-col items-center py-4 text-gray-600 font-mono text-xs gap-1">
+                            <span>1</span>
+                        </div>
+                        <div class="flex-1 p-4 font-mono text-sm text-gray-300 relative">
+                            <div class="text-gray-500 italic">// Workspace empty. Awaiting Atom...</div>
+                            <div class="absolute w-[2px] h-4 bg-neon-cyan left-[16px] top-[18px] animate-pulse shadow-[0_0_8px_#00E5FF]"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: AI AGENTS -->
+            <section id="view-agents" class="app-view flex-1 h-full hidden flex-col absolute inset-0 gap-6 overflow-y-auto custom-scrollbar p-2 z-20">
+                <header class="glass-panel p-8 rounded-2xl flex justify-between items-center shrink-0 border border-white/5">
+                    <div>
+                        <h2 class="text-3xl font-display font-bold text-white mb-2">AI Agents</h2>
+                        <p class="text-gray-400">Manage your deployed AI workforce.</p>
+                    </div>
+                    <button class="px-6 py-3 bg-neon-purple text-white font-semibold rounded-xl hover:bg-neon-purple/80 transition-colors shadow-[0_0_20px_rgba(139,92,246,0.4)] flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Deploy New Agent
+                    </button>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 min-h-0">
+                    <div class="glass-panel p-6 rounded-2xl border border-white/5 hover:border-yellow-400/30 transition-colors group relative overflow-hidden flex flex-col cursor-pointer">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-400/10 blur-[50px] rounded-full group-hover:bg-yellow-400/20 transition-colors"></div>
+                        <i class="ph-fill ph-lightning text-5xl text-yellow-400 mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white mb-1">Atom 1.1 Flash</h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-1">High-speed reasoning model for drafting and rapid prototyping.</p>
+                        <div class="flex justify-between items-center border-t border-white/5 pt-4 mt-auto">
+                            <span class="text-xs text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded border border-yellow-400/20">Active</span>
+                            <i class="ph ph-gear text-gray-400 hover:text-white transition-colors text-lg"></i>
+                        </div>
+                    </div>
+                    <!-- Pro -->
+                    <div class="glass-panel p-6 rounded-2xl border border-neon-purple/30 transition-colors group relative overflow-hidden flex flex-col shadow-[0_0_20px_rgba(139,92,246,0.1)] cursor-pointer">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-neon-purple/20 blur-[50px] rounded-full group-hover:bg-neon-purple/30 transition-colors"></div>
+                        <i class="ph-fill ph-brain text-5xl text-neon-purple mb-4 drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white mb-1">Atom 1.2 Pro</h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-1">Balanced intelligence for complex full-stack engineering tasks.</p>
+                        <div class="flex justify-between items-center border-t border-white/5 pt-4 mt-auto">
+                            <span class="text-xs text-neon-purple bg-neon-purple/10 px-2 py-1 rounded border border-neon-purple/20">Active Default</span>
+                            <i class="ph ph-gear text-gray-400 hover:text-white transition-colors text-lg"></i>
+                        </div>
+                    </div>
+                    <!-- Ultra -->
+                    <div class="glass-panel p-6 rounded-2xl border border-white/5 hover:border-neon-cyan/30 transition-colors group relative overflow-hidden flex flex-col cursor-pointer">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/10 blur-[50px] rounded-full group-hover:bg-neon-cyan/20 transition-colors"></div>
+                        <i class="ph-fill ph-infinity text-5xl text-neon-cyan mb-4 drop-shadow-[0_0_15px_rgba(0,229,255,0.5)]"></i>
+                        <h3 class="text-xl font-bold text-white mb-1">Atom 1.3 Ultra</h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-1">Deep architectural reasoning and heavy computation capabilities.</p>
+                        <div class="flex justify-between items-center border-t border-white/5 pt-4 mt-auto">
+                            <span class="text-xs text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/10">Idle</span>
+                            <i class="ph ph-gear text-gray-400 hover:text-white transition-colors text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: PROJECTS -->
+            <section id="view-projects" class="app-view flex-1 h-full hidden flex-col absolute inset-0 gap-6 overflow-y-auto custom-scrollbar p-2 z-20">
+                <header class="glass-panel p-8 rounded-2xl flex justify-between items-center shrink-0 border border-white/5">
+                    <div>
+                        <h2 class="text-3xl font-display font-bold text-white mb-2">Projects</h2>
+                        <p class="text-gray-400">You have no active projects.</p>
+                    </div>
+                    <button class="px-6 py-3 bg-neon-cyan text-black font-bold rounded-xl hover:bg-neon-cyan/80 transition-colors shadow-[0_0_20px_rgba(0,229,255,0.4)] flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Create Project
+                    </button>
+                </header>
+                <div class="flex-1 flex items-center justify-center glass-panel rounded-2xl border border-white/5 border-dashed bg-space-800/30">
+                    <div class="text-center flex flex-col items-center max-w-sm">
+                        <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] border border-white/10">
+                            <i class="ph-thin ph-folder-dashed text-4xl text-gray-500"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">No Projects Found</h3>
+                        <p class="text-gray-400 mb-6 text-sm">Start vibe coding to automatically generate a new workspace and project.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TERMINAL -->
+            <section id="view-terminal" class="app-view flex-1 h-full hidden flex-col absolute inset-0 z-20">
+                <div class="glass-panel w-full h-full rounded-2xl overflow-hidden flex flex-col border border-white/5 shadow-2xl bg-[#05050A]">
+                    <div class="h-10 border-b border-white/5 flex items-center px-4 justify-between bg-black/50 backdrop-blur-md">
+                        <div class="flex gap-2">
+                            <span class="text-gray-500 font-mono text-xs"><i class="ph-fill ph-terminal-window mr-1 text-neon-cyan"></i> root@nexus-server</span>
+                        </div>
+                        <i class="ph ph-x text-gray-500 hover:text-white cursor-pointer transition-colors text-sm"></i>
+                    </div>
+                    <div class="flex-1 p-6 font-mono text-sm text-gray-300 relative overflow-y-auto custom-scrollbar">
+                        <div><span class="text-green-400">nexus@sys</span><span class="text-gray-500">~%</span> neofetch</div>
+                        <div class="flex gap-8 mt-4 mb-6">
+                            <div class="text-neon-cyan font-bold leading-tight" style="white-space: pre;">
+       .---.
+      /     \
+     | () () |
+      \  ^  /
+       |||||
+       |||||
+                            </div>
+                            <div class="flex flex-col gap-1 text-xs">
+                                <div><span class="text-neon-cyan font-bold">OS:</span> NexusOS v2.0.4</div>
+                                <div><span class="text-neon-cyan font-bold">Kernel:</span> Quantum Core</div>
+                                <div><span class="text-neon-cyan font-bold">Uptime:</span> 12 days, 4 hours</div>
+                                <div><span class="text-neon-cyan font-bold">Memory:</span> 1.4 TB / 2.0 TB</div>
+                                <div><span class="text-neon-cyan font-bold">AI Status:</span> Atom Connected</div>
+                            </div>
+                        </div>
+                        <div><span class="text-green-400">nexus@sys</span><span class="text-gray-500">~%</span> tail -f /var/log/system.log</div>
+                        <div class="text-gray-500">[INFO] Loaded neural pathways...</div>
+                        <div class="text-gray-500">[INFO] Synchronizing with Atom Pro...</div>
+                        <div class="text-neon-purple mt-2">[WARN] Reality distortion field active.</div>
+                        <div class="mt-2"><span class="text-green-400">nexus@sys</span><span class="text-gray-500">~%</span> <span class="w-2 h-4 bg-gray-400 inline-block animate-pulse"></span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: AI CHAT -->
+            <section id="view-chat" class="app-view flex-1 h-full hidden flex-col absolute inset-0 z-20 overflow-hidden bg-space-900/90 backdrop-blur-xl">
+                <!-- 3D Background effect -->
+                <div class="absolute inset-0 pointer-events-none perspective-[1000px] overflow-hidden">
+                    <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neon-purple/20 rounded-full blur-[120px] animate-pulse" style="animation-duration: 8s;"></div>
+                    <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-neon-cyan/20 rounded-full blur-[120px] animate-pulse" style="animation-duration: 6s; animation-delay: 2s;"></div>
+                </div>
+
+                <!-- Chat Header -->
+                <header class="h-16 glass-panel border-b border-white/5 flex items-center justify-center relative z-10 shrink-0">
+                    <div class="flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.02)]">
+                        <div class="w-2.5 h-2.5 rounded-full bg-neon-purple animate-pulse shadow-[0_0_12px_rgba(139,92,246,0.9)]"></div>
+                        <span class="text-sm font-mono text-gray-300 font-semibold tracking-wide">Atom 1.3 Ultra <span class="text-gray-500 opacity-50">| Connected</span></span>
+                    </div>
+                </header>
+
+                <!-- Messages Area -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-6 relative z-10 flex flex-col gap-10 max-w-5xl mx-auto w-full pb-40 perspective-[1000px]" id="chat-messages-container">
+                    
+                    <!-- User Message -->
+                    <div class="flex flex-row-reverse gap-5 items-end self-end max-w-[80%] hover:-translate-y-1 transition-transform duration-500 group">
+                        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 flex-shrink-0 shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:border-neon-cyan/50 transition-colors">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" class="w-full h-full object-cover">
+                        </div>
+                        <div class="glass-panel p-5 rounded-3xl rounded-br-sm border border-white/10 text-white shadow-2xl relative overflow-hidden group-hover:border-white/20 transition-colors transform-style-3d group-hover:rotate-x-2 group-hover:-rotate-y-2 group-hover:scale-[1.02]">
+                            <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                            <p class="relative z-10 text-[15px] leading-relaxed">Can you write a stunning, immersive 3D React component for a floating glass cube using Framer Motion? Make it look insanely futuristic.</p>
+                        </div>
+                    </div>
+
+                    <!-- AI Message with Code -->
+                    <div class="flex gap-5 items-start max-w-[90%] group">
+                        <!-- AI Avatar -->
+                        <div class="relative flex-shrink-0 mt-2">
+                            <div class="w-12 h-12 rounded-full bg-[#08090E] border-2 border-neon-cyan/50 flex items-center justify-center relative z-10 overflow-hidden shadow-[0_0_25px_rgba(0,229,255,0.4)] group-hover:border-neon-cyan transition-colors">
+                                <div class="absolute inset-0 bg-neon-cyan/20 animate-pulse"></div>
+                                <i class="ph-fill ph-magic-wand text-neon-cyan text-xl drop-shadow-[0_0_8px_rgba(0,229,255,1)]"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 flex flex-col gap-4">
+                            <div class="text-gray-200 text-[15px] glass-panel p-5 rounded-3xl rounded-tl-sm border border-neon-cyan/30 shadow-[0_0_30px_rgba(0,229,255,0.1)] relative overflow-hidden transform-style-3d group-hover:rotate-x-1 group-hover:rotate-y-1 transition-transform duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-br from-neon-cyan/10 to-transparent pointer-events-none"></div>
+                                <p class="relative z-10 leading-relaxed">Absolutely! I've architected an ultra-premium, 3D rotating glass cube using React and Framer Motion. This leverages nested 3D transforms, real-time backdrop filtering, and fluid keyframe animations to create that perfect 2035 aesthetic.</p>
+                            </div>
+
+                            <!-- Interactive Code Block -->
+                            <div class="glass-panel rounded-2xl overflow-hidden border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.6)] relative group/code hover:border-neon-purple/40 transition-all duration-700 transform-style-3d hover:-translate-y-2 hover:rotate-x-2 hover:-rotate-y-1" style="transform: perspective(1200px);">
+                                <div class="absolute inset-0 bg-gradient-to-r from-neon-purple/5 to-neon-cyan/5 opacity-0 group-hover/code:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                                
+                                <!-- Code Header -->
+                                <div class="h-12 bg-[#05060A]/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                                        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                                        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                                        <span class="text-xs font-mono text-gray-400 ml-4 flex items-center gap-2"><i class="ph-fill ph-file-ts text-blue-400 text-lg"></i> QuantumCube.tsx</span>
+                                    </div>
+                                    <button class="text-xs font-mono bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg text-gray-300 hover:text-white flex items-center gap-2 transition-all"><i class="ph ph-copy"></i> Copy code</button>
+                                </div>
+                                <!-- Code Body -->
+                                <div class="p-5 bg-[#08090E]/90 font-mono text-sm overflow-x-auto relative leading-loose text-gray-300">
+                                    <div class="absolute left-0 top-0 bottom-0 w-12 bg-[#05060A]/50 border-r border-white/5 flex flex-col items-center py-5 text-gray-600 select-none pointer-events-none z-0">
+                                        1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12
+                                    </div>
+                                    <div class="pl-12 relative z-10" id="typewriter-code">
+                                        <div class="code-line"><span class="text-neon-purple font-medium">import</span> { motion } <span class="text-neon-purple font-medium">from</span> <span class="text-green-400">'framer-motion'</span>;</div>
+                                        <div class="code-line"><span class="text-neon-purple font-medium">import</span> React <span class="text-neon-purple font-medium">from</span> <span class="text-green-400">'react'</span>;</div>
+                                        <div class="code-line"><br></div>
+                                        <div class="code-line"><span class="text-neon-purple font-medium">export default function</span> <span class="text-blue-400 font-bold">QuantumCube</span>() {</div>
+                                        <div class="code-line pl-4"><span class="text-neon-purple font-medium">return</span> (</div>
+                                        <div class="code-line pl-8 group-hover/code:translate-x-2 transition-transform duration-300"><span class="text-gray-500">&lt;</span><span class="text-blue-400 font-bold">div</span> <span class="text-neon-cyan">className</span><span class="text-gray-500">=</span><span class="text-green-400">"perspective-[1200px] w-96 h-96 flex items-center justify-center"</span><span class="text-gray-500">&gt;</span></div>
+                                        <div class="code-line pl-12 group-hover/code:translate-x-4 transition-transform duration-300 delay-75"><span class="text-gray-500">&lt;</span><span class="text-blue-400 font-bold">motion.div</span></div>
+                                        <div class="code-line pl-16 group-hover/code:translate-x-6 transition-transform duration-300 delay-100"><span class="text-neon-cyan">animate</span><span class="text-gray-500">=</span>{{ rotateX: [<span class="text-orange-400">0</span>, <span class="text-orange-400">360</span>], rotateY: [<span class="text-orange-400">0</span>, <span class="text-orange-400">360</span>] }}</div>
+                                        <div class="code-line pl-16 group-hover/code:translate-x-6 transition-transform duration-300 delay-100"><span class="text-neon-cyan">transition</span><span class="text-gray-500">=</span>{{ duration: <span class="text-orange-400">12</span>, repeat: <span class="text-blue-300">Infinity</span>, ease: <span class="text-green-400">"linear"</span> }}</div>
+                                        <div class="code-line pl-16 group-hover/code:translate-x-6 transition-transform duration-300 delay-100"><span class="text-neon-cyan">className</span><span class="text-gray-500">=</span><span class="text-green-400">"w-48 h-48 relative transform-style-3d"</span></div>
+                                        <div class="code-line pl-12 group-hover/code:translate-x-4 transition-transform duration-300 delay-75"><span class="text-gray-500">&gt;</span></div>
+                                        <div class="code-line pl-16 text-gray-500 italic">// Holographic glass faces implemented via mapping...</div>
+                                        <div class="absolute w-[2px] h-[1.2rem] bg-neon-cyan inline-block animate-[pulse_1s_ease-in-out_infinite] shadow-[0_0_10px_#00E5FF] ml-1 align-middle mt-1 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating Input Area -->
+                <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-30 perspective-[1000px]">
+                    <div class="glass-panel p-1 rounded-[1.75rem] border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.6)] transform-style-3d hover:translate-y-[-4px] hover:shadow-[0_40px_80px_rgba(139,92,246,0.3)] transition-all duration-500 relative group/input bg-space-900/40">
+                        <!-- Background glow effect -->
+                        <div class="absolute -inset-2 bg-gradient-to-r from-neon-purple via-neon-cyan to-neon-purple rounded-[2rem] blur-xl opacity-20 group-hover/input:opacity-60 transition-opacity duration-700 pointer-events-none z-0"></div>
+                        
+                        <div class="relative z-10 flex gap-3 items-end bg-[#05060A]/90 rounded-3xl p-3 backdrop-blur-3xl border border-white/10">
+                            <button class="w-12 h-12 flex items-center justify-center rounded-xl text-gray-400 hover:text-neon-cyan hover:bg-neon-cyan/10 transition-colors flex-shrink-0">
+                                <i class="ph ph-plus text-2xl"></i>
+                            </button>
+                            <textarea placeholder="Message Atom... Try asking it to architect a 3D interface." class="bg-transparent border-none outline-none text-white placeholder-gray-500 flex-1 resize-none h-12 py-3 custom-scrollbar text-[15px] font-medium leading-relaxed" rows="1"></textarea>
+                            <div class="flex flex-col gap-2 flex-shrink-0">
+                                <button class="w-12 h-12 flex items-center justify-center rounded-xl bg-white text-black hover:bg-gray-200 hover:scale-[1.05] hover:shadow-[0_0_20px_rgba(255,255,255,0.6)] transition-all duration-300">
+                                    <i class="ph-bold ph-arrow-up text-xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4 text-[11px] tracking-wide text-gray-500 font-mono opacity-80">Atom operates at quantum speeds. Please verify critical logic patterns.</div>
+                </div>
+            </section>
+
+            <!-- VIEW: SETTINGS -->
+            <section id="view-settings" class="app-view flex-1 h-full hidden flex-col absolute inset-0 gap-6 overflow-y-auto custom-scrollbar p-2 z-20">
+                <header class="glass-panel p-8 rounded-2xl flex justify-between items-center shrink-0 border border-white/5">
+                    <div>
+                        <h2 class="text-3xl font-display font-bold text-white mb-2">Settings</h2>
+                        <p class="text-gray-400">Configure your Nexus environment.</p>
+                    </div>
+                </header>
+                <div class="glass-panel p-8 rounded-2xl border border-white/5 flex-1 flex flex-col max-w-4xl mx-auto w-full">
+                    <div class="flex gap-6 border-b border-white/10 pb-8 mb-8 items-center">
+                        <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-neon-cyan shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="User" class="w-full h-full object-cover"/>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <h3 class="text-2xl font-bold text-white mb-1">Sumer Yadav</h3>
+                            <span class="text-neon-purple font-mono text-sm bg-neon-purple/10 px-3 py-1 rounded-full border border-neon-purple/20 self-start">Pro Plan Active</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors">
+                            <div>
+                                <h4 class="text-white font-medium mb-1 text-lg">Hardware Acceleration</h4>
+                                <p class="text-sm text-gray-400">Use GPU to render complex 3D shaders and animations.</p>
+                            </div>
+                            <div class="w-14 h-7 bg-neon-cyan/20 rounded-full border border-neon-cyan relative cursor-pointer shadow-[0_0_10px_rgba(0,229,255,0.2)]">
+                                <div class="absolute right-1 top-1 w-5 h-5 rounded-full bg-neon-cyan shadow-[0_0_5px_#00E5FF]"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors">
+                            <div>
+                                <h4 class="text-white font-medium mb-1 text-lg">Vibe Coding Sound Effects</h4>
+                                <p class="text-sm text-gray-400">Play sci-fi UI sounds when interacting.</p>
+                            </div>
+                            <div class="w-14 h-7 bg-white/10 rounded-full border border-white/20 relative cursor-pointer">
+                                <div class="absolute left-1 top-1 w-5 h-5 rounded-full bg-gray-400"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors">
+                            <div>
+                                <h4 class="text-white font-medium mb-1 text-lg">Atom Proactivity Level</h4>
+                                <p class="text-sm text-gray-400">How often Atom suggests code without prompting.</p>
+                            </div>
+                            <select class="bg-space-900 border border-white/10 rounded-lg px-4 py-2 text-white outline-none cursor-pointer focus:border-neon-cyan transition-colors">
+                                <option>Low (Quiet)</option>
+                                <option selected>Medium (Balanced)</option>
+                                <option>High (Aggressive)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

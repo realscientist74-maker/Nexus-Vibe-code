@@ -1,0 +1,321 @@
+/* Nexus Premium Styles */
+
+:root {
+    --glass-bg: rgba(14, 17, 23, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.03);
+    --glow-cyan: rgba(0, 229, 255, 0.15);
+    --glow-purple: rgba(139, 92, 246, 0.15);
+}
+
+/* Liquid Glass Design */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 
+        0 4px 24px -1px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-light {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Custom Scrollbar for sleekness */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Base resets & utilities */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animated gradient background for hero title */
+.hero-title {
+    background-size: 200% auto;
+    animation: shine 5s linear infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position: 200% center;
+    }
+}
+
+/* Pulsing grid background for workspace */
+.dashboard-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    z-index: 0;
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
+    pointer-events: none;
+}
+
+/* Code Editor Specifics */
+.code-line {
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+    padding: 0 4px;
+    margin-left: -4px;
+}
+
+/* Holographic glowing borders on hover */
+.nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(to right, rgba(0, 229, 255, 0.5), rgba(139, 92, 246, 0.5));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.nav-item:hover::before,
+.nav-item.active::before {
+    opacity: 1;
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, rgba(0, 229, 255, 0.1) 0%, transparent 100%);
+}
+
+/* Micro-animations */
+button {
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+/* Terminal Scanlines */
+.terminal-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 6px 100%;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+/* Image anti-aliasing */
+img {
+    -webkit-user-drag: none;
+}
+
+/* ============================================================
+   LIGHT MODE — GLOBAL OVERRIDES
+   Applied when html does NOT have the 'dark' class
+   ============================================================ */
+
+html:not(.dark) {
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+/* --- Body & Backgrounds --- */
+html:not(.dark) body {
+    background-color: #EEF2F7 !important;
+    color: #0f172a !important;
+}
+
+/* Space background classes → white */
+html:not(.dark) .bg-space-900 { background-color: #F8FAFF !important; }
+html:not(.dark) .bg-space-800 { background-color: #F0F4FA !important; }
+html:not(.dark) [class*="bg-space-900"] { background-color: #F8FAFF !important; }
+html:not(.dark) [class*="bg-space-800"] { background-color: #F0F4FA !important; }
+html:not(.dark) [class*="bg-\[#05"] { background-color: #ffffff !important; }
+html:not(.dark) [class*="bg-\[#08"] { background-color: #F8FAFF !important; }
+html:not(.dark) [class*="bg-\[#0A"] { background-color: #F0F4FA !important; }
+
+/* Glass panels */
+html:not(.dark) .glass-panel {
+    background: rgba(255, 255, 255, 0.65) !important;
+    border-color: rgba(0, 0, 0, 0.07) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+html:not(.dark) .glass-panel-light {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(0,0,0,0.06) !important;
+}
+
+/* --- Text Colors --- */
+html:not(.dark) .text-white   { color: #0f172a !important; }
+html:not(.dark) .text-gray-100 { color: #1e293b !important; }
+html:not(.dark) .text-gray-200 { color: #334155 !important; }
+html:not(.dark) .text-gray-300 { color: #475569 !important; }
+html:not(.dark) .text-gray-400 { color: #64748b !important; }
+html:not(.dark) .text-gray-500 { color: #94a3b8 !important; }
+html:not(.dark) .text-gray-600 { color: #94a3b8 !important; }
+
+/* Hero gradient title - override so it stays visible */
+html:not(.dark) .hero-title {
+    background-image: linear-gradient(to right, #0f172a, #334155, #64748b) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    color: transparent !important;
+}
+
+/* --- Borders --- */
+html:not(.dark) .border-white\/5  { border-color: rgba(0,0,0,0.06) !important; }
+html:not(.dark) .border-white\/10 { border-color: rgba(0,0,0,0.09) !important; }
+html:not(.dark) .border-white\/20 { border-color: rgba(0,0,0,0.12) !important; }
+
+/* --- Translucent backgrounds --- */
+html:not(.dark) .bg-white\/5  { background-color: rgba(0,0,0,0.03) !important; }
+html:not(.dark) .bg-white\/10 { background-color: rgba(0,0,0,0.05) !important; }
+html:not(.dark) .bg-white\/20 { background-color: rgba(0,0,0,0.07) !important; }
+html:not(.dark) .bg-black\/50 { background-color: rgba(0,0,0,0.04) !important; }
+html:not(.dark) .bg-black\/40 { background-color: rgba(0,0,0,0.04) !important; }
+
+/* --- Sidebar --- */
+html:not(.dark) aside.glass-panel {
+    background: rgba(255, 255, 255, 0.75) !important;
+}
+html:not(.dark) .nav-item span,
+html:not(.dark) .nav-item .font-medium {
+    color: #334155 !important;
+    opacity: 1 !important;
+}
+html:not(.dark) .nav-item i {
+    color: #64748b !important;
+}
+html:not(.dark) .nav-item.active i {
+    color: #00bcd4 !important;
+}
+html:not(.dark) .nav-item:hover span,
+html:not(.dark) .nav-item:hover i {
+    color: #0f172a !important;
+}
+html:not(.dark) .nav-item.active {
+    background: linear-gradient(90deg, rgba(0,229,255,0.12) 0%, transparent 100%) !important;
+}
+
+/* --- Code Editor --- */
+html:not(.dark) .editor-panel,
+html:not(.dark) #view-editor > div {
+    background: #ffffff !important;
+}
+html:not(.dark) .font-mono.text-gray-300 { color: #334155 !important; }
+html:not(.dark) .font-mono.text-gray-500 { color: #94a3b8 !important; }
+html:not(.dark) .code-line { color: #1e293b !important; }
+html:not(.dark) .code-line.text-gray-500 { color: #94a3b8 !important; }
+
+/* --- Terminal --- */
+html:not(.dark) #view-terminal .glass-panel,
+html:not(.dark) [id="view-terminal"] > div {
+    background: #1e2433 !important;
+}
+html:not(.dark) #view-terminal .text-gray-300 { color: #cbd5e1 !important; }
+
+/* --- AI Chat View --- */
+html:not(.dark) #view-chat {
+    background: rgba(238, 242, 247, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+}
+html:not(.dark) #view-chat header.glass-panel {
+    background: rgba(255,255,255,0.7) !important;
+}
+html:not(.dark) #view-chat .glass-panel {
+    background: rgba(255,255,255,0.6) !important;
+}
+/* Chat message bubbles */
+html:not(.dark) #view-chat .text-gray-200 { color: #1e293b !important; }
+html:not(.dark) #view-chat .text-white     { color: #0f172a !important; }
+/* Code block inside chat */
+html:not(.dark) #view-chat [class*="bg-\[#08090E\]"],
+html:not(.dark) #view-chat [class*="bg-\[#05060A\]"] {
+    background: #1e2433 !important;
+}
+html:not(.dark) #view-chat [class*="bg-\[#08090E\]"] .text-gray-300 { color: #cbd5e1 !important; }
+
+/* Chat input box */
+html:not(.dark) #view-chat textarea {
+    color: #0f172a !important;
+}
+html:not(.dark) #view-chat textarea::placeholder { color: #94a3b8 !important; }
+html:not(.dark) #view-chat [class*="bg-\[#05060A\]\/90"] {
+    background: rgba(255,255,255,0.85) !important;
+}
+
+/* --- AI Agents View --- */
+html:not(.dark) #view-agents h2,
+html:not(.dark) #view-agents h3 { color: #0f172a !important; }
+html:not(.dark) #view-agents p   { color: #475569 !important; }
+
+/* --- Projects View --- */
+html:not(.dark) #view-projects h2,
+html:not(.dark) #view-projects h3 { color: #0f172a !important; }
+html:not(.dark) #view-projects p   { color: #475569 !important; }
+html:not(.dark) #view-projects .border-dashed {
+    border-color: rgba(0,0,0,0.1) !important;
+    background: rgba(255,255,255,0.3) !important;
+}
+
+/* --- Settings View --- */
+html:not(.dark) #view-settings h2,
+html:not(.dark) #view-settings h3,
+html:not(.dark) #view-settings h4 { color: #0f172a !important; }
+html:not(.dark) #view-settings p   { color: #475569 !important; }
+html:not(.dark) #view-settings select {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: rgba(0,0,0,0.15) !important;
+}
+
+/* --- Input fields --- */
+html:not(.dark) input[type="text"],
+html:not(.dark) textarea {
+    color: #0f172a !important;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder { color: #94a3b8 !important; }
+
+/* --- Theme toggle button --- */
+html:not(.dark) #theme-toggle {
+    background: rgba(255,255,255,0.8) !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* --- Dashboard Hero grid overlay --- */
+html:not(.dark) .dashboard-hero::before {
+    background-image:
+        linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px) !important;
+}
+
+/* --- Sidebar user badge text --- */
+html:not(.dark) .text-neon-purple { color: #7c3aed !important; }

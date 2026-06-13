@@ -1,0 +1,2 @@
+"# Task: Restore & Enhance Nexus\n\n- [ ] Fix JS crashes and missing elements\n    - [ ] Update `landing.js` (safeguard GSAP, fix `.hero-badge`)\n    - [ ] Update `script.js` (safeguard GSAP, fix selectors)\n- [ ] Implement 3D Portal Transition\n    - [ ] 
+<truncated 597 bytes>

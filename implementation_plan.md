@@ -1,0 +1,2 @@
+"# Restoration & 3D Transition Plan\n\nThis plan fixes the current app \"chaos\" and adds a high-fidelity \"Portal\" transition between the Homescreen and the Vibe Coding workspace.\n\n## User Review Required\n\n> [!IMPORTANT]\n> I will implement a **\"Cam
+<truncated 2016 bytes>
